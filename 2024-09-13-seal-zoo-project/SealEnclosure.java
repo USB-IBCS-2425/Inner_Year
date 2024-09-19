@@ -1,9 +1,9 @@
 import java.util.Random;
 
 class SealEnclosure {
-	String enclosureName;
-	String seals;
-	boolean open;
+	private String enclosureName;
+	private String seals;
+	private boolean open;
 
 	// Accessors
 
@@ -42,7 +42,7 @@ class SealEnclosure {
 
 	// Reproduction
 
-	public Seal breed(Seal partner1, Seal partner2, String offspringName) {
+	public static Seal breed(Seal partner1, Seal partner2, String offspringName) {
 		String offspringEyeColor = partner1.getEyeColor() == partner2.getEyeColor() ? partner1.getEyeColor() : "Black"; //Only brown-eyed if both parents brown-eyed
 		Random a = new Random();
 		char[] offspringSexList = {'m', 'f'}; 
@@ -101,7 +101,7 @@ class SealEnclosure {
 		System.out.println("");
 
 		// Test Reproduction Method
-		Seal timmy = awesomeEnclosureOfSeals.breed(kenya, smith, "little timmy");
+		Seal timmy = SealEnclosure.breed(kenya, smith, "little timmy");
 		System.out.println(timmy.getName());
 		System.out.println(timmy.getSex());
 		System.out.println(timmy.getAge());

@@ -2,10 +2,10 @@
 
 
 class Seal {
-	String name;
-	char sex; //'m' or 'f'
-	byte age;
-	String eyeColor; //"Black" or "Brown"
+	private String name;
+	private char sex; //'m' or 'f'
+	private byte age;
+	private String eyeColor; //"Black" or "Brown"
 
 	// Accessors
 
