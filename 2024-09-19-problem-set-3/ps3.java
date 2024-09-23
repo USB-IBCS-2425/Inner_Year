@@ -80,8 +80,8 @@ class Shape {
 }
 
 class Rectangle extends Shape {
-	int length;
-	int width;
+	private int length;
+	private int width;
 
 	public int getLength() {
 		return this.length;
@@ -102,7 +102,7 @@ class Rectangle extends Shape {
 }
 
 class Circle extends Shape {
-	int radius;
+	private int radius;
 
 	public int getRadius() {
 		return this.radius;
