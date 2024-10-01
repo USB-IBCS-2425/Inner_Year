@@ -25,7 +25,7 @@ class PracticeQuiz {
 				result += " ";
 			}
 		}
-		if (result[result.length() - 1] == 1) {
+		if (result.charAt(result.length() - 1) == ' ') {
 			result = result.substring(0, result.length() - 1);
 		}
 		return result;
@@ -34,7 +34,7 @@ class PracticeQuiz {
 	public static String randomSentence(String[] stringArray, int n) {
 		String result = "";
 		for (int i = 0; i < n; i++) {
-			result += stringArray[Math.floor(Math.random() * stringArray.length)];
+			result += stringArray[(int) Math.floor(Math.random() * stringArray.length)];
 		}
 		return result;
 	}
