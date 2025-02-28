@@ -1,10 +1,6 @@
 //thomas sands
 
-// is sentence length meant to be by word or characters in the words?
-// sentence length is by words
 
-
-//should apostrophes and dashes count towards word length?
 
 import java.awt.*;
 import java.io.File;
@@ -48,12 +44,16 @@ class LitAnalysisLab {
     public static ArrayList<ArrayList<String>> sentences;
 
     //more word data (but only calculated on request)
-    public static HashMap<String, Integer> wordFrequencyDict; //not used cuz no time
+    public static HashMap<String, Integer> wordFrequencyDict;
+    public static boolean wordFrequencyDictCalculated;
 
     public LitAnalysisLab() {
         //variable initialization
         words = new ArrayList<String>();
         sentences = new ArrayList<ArrayList<String>>();
+
+        wordFrequencyDict = new HashMap<String, Integer>();
+        wordFrequencyDictCalculated = false;
 
 
         //frame
@@ -148,9 +148,14 @@ class LitAnalysisLab {
         LitAnalysisLab lab = new LitAnalysisLab();
     }
 
+    //theres lowk some redundant stuff that removes empty strings from words at multiple different points from when i was trying to debug
+
     public static void readFile() {
         words.clear();
         sentences.clear();
+
+        wordFrequencyDict.clear();
+        wordFrequencyDictCalculated = false;
 
         //open file
         try {
@@ -195,10 +200,29 @@ class LitAnalysisLab {
             text = text.replaceAll(GENERIC_PUNCTUATION_REGEX, " "); //replace all punctuation with spaces
             words = new ArrayList<>(Arrays.asList(text.split(GENERIC_WHITESPACE_REGEX))); //separate all words
 
+            //removes empty strings cuz there were issues with that i think
+            for (int i = 0; i < words.size(); i++) {
+                if (words.get(i).length() < 1) {
+                    words.remove(i);
+                }
+            }
+
+            System.out.println(words);
+
             textArea.setText("File read!");
         } catch (FileNotFoundException error) {
             System.out.println("file not found during readFile() parsing");
             error.printStackTrace();
+        }
+    }
+
+    public static void calculateWordDict() {
+        for (String word : words) {
+            if (wordFrequencyDict.containsKey(word)) {
+                wordFrequencyDict.put(word, 1 + wordFrequencyDict.get(word));
+            } else {
+                wordFrequencyDict.put(word, 1);
+            }
         }
     }
 
@@ -212,24 +236,31 @@ class LitAnalysisLab {
         return x;
     }
 
-    public static Integer getUniqueness(ArrayList<String> a) { //higher = less unique
-        HashMap<String, Integer> dict = new HashMap<String, Integer>();
-
-        for (String word : words) {
-            if (dict.containsKey(word)) {
-                dict.put(word, 1 + dict.get(word));
-            } else {
-                dict.put(word, 1);
-            }
+    public static Integer getUniqueness(ArrayList<String> a) { //avg uniqueness per word, higher = less unique
+        if (!wordFrequencyDictCalculated) {
+            calculateWordDict();
+            wordFrequencyDictCalculated = true;
         }
 
+        int sentenceLength = 0;
         int total = 0;
 
         for (String word : a) {
-            total += dict.get(word);
+            if(wordFrequencyDict.containsKey(word)) {
+                total += wordFrequencyDict.get(word);
+                sentenceLength++;
+            } else {
+                System.out.println("nonfatal error in getUniqueness(): word not found in freqdict '" + word + "'");
+            }
         }
 
-        return total;
+        if (total == 0) {
+            return Integer.MAX_VALUE;
+            //bc if every word occurs zero times then clearly it was comprised purely of 'words' that
+            //werent in the freqdict, meaning they were probably empty strings that existed for some reason
+        }
+
+        return total / sentenceLength; //int divison so it is technically not as accurate, but it also gives more results so theres more to analyze
     }
 
     public static void getAvgWordLength() {
@@ -255,26 +286,21 @@ class LitAnalysisLab {
     }
 
     public static void getCommonWord() {
-        HashMap<String, Integer> dict = new HashMap<String, Integer>();
-
-        for (String word : words) {
-            if (dict.containsKey(word)) {
-                dict.put(word, 1 + dict.get(word));
-            } else {
-                dict.put(word, 1);
-            }
+        if (!wordFrequencyDictCalculated) {
+            calculateWordDict();
+            wordFrequencyDictCalculated = true;
         }
 
-        int max = dict.get(words.get(0));
+        int max = wordFrequencyDict.get(words.get(0));
 
         ArrayList<String> commonwords = new ArrayList<String>();
 
-        for (String k : dict.keySet()) {
-            if (dict.get(k) > max) {
+        for (String k : wordFrequencyDict.keySet()) {
+            if (wordFrequencyDict.get(k) > max) {
                 commonwords.clear();
                 commonwords.add(k);
-                max = dict.get(k);
-            } else if (dict.get(k) == max) {
+                max = wordFrequencyDict.get(k);
+            } else if (wordFrequencyDict.get(k) == max) {
                 commonwords.add(k);
             }
         }
@@ -283,26 +309,21 @@ class LitAnalysisLab {
     }
 
     public static void getRareWord() {
-        HashMap<String, Integer> dict = new HashMap<String, Integer>();
-
-        for (String word : words) {
-            if (dict.containsKey(word)) {
-                dict.put(word, 1 + dict.get(word));
-            } else {
-                dict.put(word, 1);
-            }
+        if (!wordFrequencyDictCalculated) {
+            calculateWordDict();
+            wordFrequencyDictCalculated = true;
         }
 
-        int min = dict.get(words.get(0));
+        int min = wordFrequencyDict.get(words.get(0));
 
         ArrayList<String> rarewords = new ArrayList<String>();
 
-        for (String k : dict.keySet()) {
-            if (dict.get(k) < min) {
+        for (String k : wordFrequencyDict.keySet()) {
+            if (wordFrequencyDict.get(k) < min) {
                 rarewords.clear();
                 rarewords.add(k);
-                min = dict.get(k);
-            } else if (dict.get(k) == min) {
+                min = wordFrequencyDict.get(k);
+            } else if (wordFrequencyDict.get(k) == min) {
                 rarewords.add(k);
             }
         }
@@ -383,7 +404,7 @@ class LitAnalysisLab {
     }
 
     public static void getUniqueSentence() {
-        int min = 0;
+        int min = Integer.MAX_VALUE;
 
         ArrayList<ArrayList<String>> vsents = new ArrayList<ArrayList<String>>();
 
@@ -395,12 +416,13 @@ class LitAnalysisLab {
             } else if (getUniqueness(k) == min) {
                 vsents.add(k);
             }
+            System.out.println("" + System.currentTimeMillis() + "checked! min=" + min);
         }
 
         String result = "";
 
         for (ArrayList<String> b : vsents) {
-            result += String.join(", ", b) + ", ";
+            result += String.join(" ", b) + ", ";
         }
 
         textArea.setText(result);
