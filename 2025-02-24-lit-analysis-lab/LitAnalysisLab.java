@@ -236,7 +236,7 @@ class LitAnalysisLab {
         return x;
     }
 
-    public static Integer getUniqueness(ArrayList<String> a) { //avg uniqueness per word, higher = less unique
+    public static Float getUniqueness(ArrayList<String> a) { //avg uniqueness per word, higher = less unique
         if (!wordFrequencyDictCalculated) {
             calculateWordDict();
             wordFrequencyDictCalculated = true;
@@ -255,12 +255,12 @@ class LitAnalysisLab {
         }
 
         if (total == 0) {
-            return Integer.MAX_VALUE;
+            return Float.MAX_VALUE;
             //bc if every word occurs zero times then clearly it was comprised purely of 'words' that
             //werent in the freqdict, meaning they were probably empty strings that existed for some reason
         }
 
-        return total / sentenceLength; //int divison so it is technically not as accurate, but it also gives more results so theres more to analyze
+        return (float)total / (float)sentenceLength; //int divison so it is technically not as accurate, but it also gives more results so theres more to analyze
     }
 
     public static void getAvgWordLength() {
@@ -404,19 +404,21 @@ class LitAnalysisLab {
     }
 
     public static void getUniqueSentence() {
-        int min = Integer.MAX_VALUE;
+        float min = Float.MAX_VALUE;
 
         ArrayList<ArrayList<String>> vsents = new ArrayList<ArrayList<String>>();
 
         for (ArrayList<String> k : sentences) {
-            if (getUniqueness(k) < min) {
-                vsents.clear();
-                vsents.add(k);
-                min = getUniqueness(k);
-            } else if (getUniqueness(k) == min) {
-                vsents.add(k);
-            }
-            System.out.println("" + System.currentTimeMillis() + "checked! min=" + min);
+            if (k.size() > 7) { //sentences must be 8+ words per the assignment instructions
+                if (getUniqueness(k) < min) {
+                    vsents.clear();
+                    vsents.add(k);
+                    min = getUniqueness(k);
+                } else if (getUniqueness(k) == min) {
+                    vsents.add(k);
+                }
+                //System.out.println("" + System.currentTimeMillis() + "checked! min=" + min);
+            } 
         }
 
         String result = "";
